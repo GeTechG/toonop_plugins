@@ -1,5 +1,8 @@
 # Builds the plugins: a check on every pull request, a publish on master.
 #
+# The branch as it stands is checked out beside the sources, so a plugin whose
+# sources have not changed is copied from it instead of being built again.
+#
 # The `build` branch is machine-written: its whole content is replaced on each
 # publish (`dist/` becomes the root of the branch), so nobody commits to it by
 # hand.
@@ -19,6 +22,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The first ever build has no such branch; then there is simply nothing
+      # to reuse, and everything is built.
+      - name: the build branch as it stands
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: build
+          path: published
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -26,6 +38,8 @@ jobs:
       - run: npm install
 
       - run: npm run build
+        env:
+          PUBLISHED: published
 
       - name: publish the build branch
         if: github.event_name == 'push'
