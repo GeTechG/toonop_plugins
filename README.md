@@ -18,6 +18,9 @@ https://raw.githubusercontent.com/GeTechG/toonop_plugins/build/index.json
 
 - Бандл самодостаточен: ни одного импорта наружу, из редактора приходит ровно
   один объект — `host`.
+- Иконка — разметка на 24-сетке в манифесте: `icon` плагина, а если его нет —
+  иконка первого инструмента. Ею плагин рисуется и в каталоге, и в списке;
+  без неё сборка не проходит.
 - Свой вид примитива придумывать нельзя: в кадр кладётся то, что уже знает
   формат и рисует рендерер. Иначе кадр не покажет ни плеер, ни экспорт, ни
   опубликованный мультик.
@@ -26,8 +29,7 @@ https://raw.githubusercontent.com/GeTechG/toonop_plugins/build/index.json
 
 ```
 plugins/<id>/
-  package.json     name = <id>, version = 1.2.3, description, toonop.title, toonop.icon
-  icon.svg         24×24, одна линия чернил (viewBox="0 0 24 24")
+  package.json     name = <id>, version = 1.2.3, description, toonop.title
   src/index.ts     export default манифест
 ```
 

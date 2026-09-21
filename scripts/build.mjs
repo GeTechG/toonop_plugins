@@ -45,12 +45,6 @@ const before = published
   ? await readFile(path.join(published, 'index.json'), 'utf8').then(JSON.parse, () => null)
   : null;
 
-/** The inside of an icon: the editor draws it in its own <svg viewBox="0 0 24 24">. */
-function iconMarkup(svg) {
-  const inner = svg.replace(/^[^]*?<svg[^>]*>/, '').replace(/<\/svg>[^]*$/, '');
-  return inner.replace(/\s+/g, ' ').trim();
-}
-
 /**
  * What a plugin is made of, as one hash: every file of its folder but its own
  * build output. Names go in with the bytes, so a rename counts as a change.
@@ -144,8 +138,13 @@ for (const dir of dirs) {
     fail(`${dir}: ${refuse}`);
   }
 
-  const icon = await readFile(path.join(base, pkg.toonop?.icon ?? 'icon.svg'), 'utf8')
-    .then(iconMarkup, () => fail(`${dir}: no icon file`));
+  // The record is drawn with the icon the manifest already carries: the editor
+  // reads it from there for a bundle put in from a file, and a second copy in
+  // the folder is a second copy to keep in step.
+  const icon = manifest.icon ?? Object.values(manifest.tools ?? {})[0]?.icon;
+  if (typeof icon !== 'string' || !icon.trim()) {
+    fail(`${dir}: neither the manifest nor its first tool brings an icon`);
+  }
 
   plugins.push({
     id: dir,

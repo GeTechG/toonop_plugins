@@ -23,16 +23,20 @@ const capture = (line: readonly number[], points: readonly number[]): number[] =
   return line.length >= 2 ? [line[0], line[1], x, y] : [x, y];
 };
 
+/** Drawn on the 24-unit grid: the catalog record and the tool both take it. */
+const ICON = '<path d="M5 19 19 5" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="5" r="2" />';
+
 const plugin: Plugin = {
   id: 'straight-line',
   // The major this plugin was written against: see types/toonop.ts.
   api: 1,
+  icon: ICON,
   tools: {
     'straight-line': {
       label: 'Линия',
       title: 'Ровная линия (L)',
       key: 'l',
-      icon: '<path d="M5 19 19 5" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="5" r="2" />',
+      icon: ICON,
       stroke: {
         kind: 'pencil',
         descriptor: ({ width, color }) => ({ kind: 'pencil', geometry: 'smooth', width, color }),
