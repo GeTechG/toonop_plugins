@@ -342,6 +342,8 @@ export interface Plugin {
   readonly name?: string;
   readonly version?: string;
   readonly description?: string;
+  /** SVG markup on the 24-unit grid, drawn beside the name in the list. */
+  readonly icon?: string;
   /** The tools it brings, keyed by the id each takes in the register. */
   readonly tools?: Readonly<Record<string, PluginTool>>;
   readonly presets?: Readonly<Record<string, PluginPreset>>;
