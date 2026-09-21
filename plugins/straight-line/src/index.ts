@@ -31,10 +31,16 @@ const plugin: Plugin = {
   // The major this plugin was written against: see types/toonop.ts.
   api: 1,
   icon: ICON,
+  // Its own words, under its own namespace in the editor's i18next. The
+  // manifest below points into them by key; `host.t` would read the same.
+  locales: {
+    ru: { label: 'Линия', title: 'Ровная линия (L)' },
+    en: { label: 'Line', title: 'Straight line (L)' },
+  },
   tools: {
     'straight-line': {
-      label: 'Линия',
-      title: 'Ровная линия (L)',
+      label: { t: 'label' },
+      title: { t: 'title' },
       key: 'l',
       icon: ICON,
       stroke: {

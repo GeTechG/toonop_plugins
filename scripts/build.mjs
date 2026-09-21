@@ -32,6 +32,25 @@ function fail(message) {
   process.exit(1);
 }
 
+/**
+ * The list is shown before anything is installed, so a record cannot point
+ * into the plugin's own catalogue — it carries the words instead: a string,
+ * or `{ ru: '…', en: '…' }`. `description` stays npm's own single string;
+ * `toonop.description` is the localised one when there is one.
+ */
+function catalogDescription(pkg) {
+  return pkg.toonop?.description ?? pkg.description;
+}
+
+/** Whether a record's text says anything at all, in any language. */
+function hasText(value) {
+  if (typeof value === 'string') {
+    return value.trim() !== '';
+  }
+  return typeof value === 'object' && value !== null
+    && Object.values(value).some((text) => typeof text === 'string' && text.trim() !== '');
+}
+
 /** The contract major, from the contract itself: two numbers must not drift. */
 const contract = await readFile(path.join(root, 'types', 'toonop.ts'), 'utf8');
 const PLUGIN_API = Number(contract.match(/export type PluginApi = (\d+);/)?.[1]);
@@ -103,7 +122,7 @@ for (const dir of dirs) {
   if (!/^\d+\.\d+\.\d+$/.test(pkg.version ?? '')) {
     fail(`${dir}: version must look like 1.2.3, not "${pkg.version}"`);
   }
-  if (!pkg.description) {
+  if (!hasText(catalogDescription(pkg))) {
     fail(`${dir}: without a description there is nothing to show in the catalog`);
   }
   if (!pkg.scripts?.build) {
@@ -150,7 +169,7 @@ for (const dir of dirs) {
     id: dir,
     name: pkg.toonop?.title ?? dir,
     version: pkg.version,
-    description: pkg.description,
+    description: catalogDescription(pkg),
     icon,
     entry: `${dir}/plugin.js`,
     size: (await stat(bundle)).size,

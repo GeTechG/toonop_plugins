@@ -130,6 +130,22 @@ export type ToolDescriptor =
 // The contract
 // ---------------------------------------------------------------------------
 
+/**
+ * Text the plugin shows a person, in one of three shapes.
+ *
+ * A plugin is compiled apart from the editor and cannot reach its catalogue —
+ * nor should it: those keys are renamed by the week, and a plugin able to
+ * write into them could rewrite the editor's own words. It hands over the
+ * text, or a key into a catalogue of its own (`Plugin.locales`).
+ */
+export type PluginText =
+  /** The same words for everyone. */
+  | string
+  /** A key of this plugin's own catalogue. */
+  | { readonly t: string }
+  /** One string per locale, for a plugin too small to carry a catalogue. */
+  | Readonly<Record<string, string>>;
+
 /** A point of the gesture, in document units. */
 export interface PluginPoint {
   readonly x: number;
@@ -150,6 +166,12 @@ export interface PluginStroke {
  * divides by that constant itself.
  */
 export interface PluginHost {
+  /**
+   * The plugin's own words, by key, out of the catalogue it shipped in
+   * `locales`. Another plugin's keys and the editor's are not its to read:
+   * the catalogue lives under a namespace of this plugin alone.
+   */
+  t(key: string, params?: Record<string, unknown>): string;
   /** A node inside a floating window of the editor; it lives until the tool is left. */
   window(opts: { title: string }): HTMLElement;
   /** The strokes of the current frame on the selected, visible layers. */
@@ -228,8 +250,8 @@ export interface PluginPrimitive {
 
 /** A tool a plugin adds: how it is drawn, and what the gesture does. */
 export interface PluginTool {
-  readonly label: string;
-  readonly title: string;
+  readonly label: PluginText;
+  readonly title: PluginText;
   /** The shortcut it asks for; dropped when something already holds it. */
   readonly key: string;
   /** SVG markup on a 24-unit grid, drawn at the size of the editor's own icons. */
@@ -313,7 +335,7 @@ export interface PluginPanels {
 
 /** A preset: what the editor behaves like, brought whole. */
 export interface PluginPreset {
-  readonly label: string;
+  readonly label: PluginText;
   /** Default brush: the tool whose rules a tool without its own follows. */
   readonly brush: string;
   /** The brush type it opens with; the everyday one when it names none. */
@@ -324,9 +346,9 @@ export interface PluginPreset {
 
 /** A type the brush in hand can be switched to; the everyday one is the editor's own. */
 export interface PluginBrushType {
-  readonly label: string;
+  readonly label: PluginText;
   /** One line on what it draws, for the list that offers it. */
-  readonly hint?: string;
+  readonly hint?: PluginText;
   /** Everyday tool id → the tool that stands in for it. */
   readonly twins: Readonly<Record<string, string>>;
 }
@@ -339,9 +361,19 @@ export interface PluginBrushType {
 export interface Plugin {
   readonly id: string;
   readonly api: PluginApi;
-  readonly name?: string;
+  readonly name?: PluginText;
   readonly version?: string;
-  readonly description?: string;
+  readonly description?: PluginText;
+  /**
+   * The plugin's own catalogue: locale → resources, in i18next's shape. The
+   * editor hands it to its own i18next under a namespace of this plugin
+   * before it reads a single record, so `{ t: '…' }` above already answers,
+   * and `host.t` reads the same keys at runtime.
+   *
+   * A key nothing answers is a record without text: it is refused with a
+   * reason rather than shown as a raw key.
+   */
+  readonly locales?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   /** SVG markup on the 24-unit grid, drawn beside the name in the list. */
   readonly icon?: string;
   /** The tools it brings, keyed by the id each takes in the register. */
