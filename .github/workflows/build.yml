@@ -1,0 +1,41 @@
+# Builds the plugins: a check on every pull request, a publish on master.
+#
+# The `build` branch is machine-written: its whole content is replaced on each
+# publish (`dist/` becomes the root of the branch), so nobody commits to it by
+# hand.
+name: build
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - run: npm run build
+
+      - name: publish the build branch
+        if: github.event_name == 'push'
+        working-directory: dist
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git init -q -b build
+          git config user.name "toonop build"
+          git config user.email "build@toonop.local"
+          git add -A
+          git commit -q -m "build from ${GITHUB_SHA}"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}" build

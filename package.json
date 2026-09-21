@@ -1,0 +1,11 @@
+{
+  "name": "toonop-plugins",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Плагины редактора toonop: исходники в master, собранный каталог в ветке build.",
+  "workspaces": ["plugins/*"],
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}
