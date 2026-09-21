@@ -1,6 +1,6 @@
 {
   "name": "straight-line",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Ровная линия: тянете от точки до точки, в кадр ложится прямая.",
   "license": "MIT",
   "private": true,
