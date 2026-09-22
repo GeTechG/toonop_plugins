@@ -354,6 +354,65 @@ export interface PluginBrushType {
 }
 
 /**
+ * What the editor draws a cell onto: the renderer's own commands, the subset
+ * of Canvas 2D it speaks. A format translates these rather than reading the
+ * geometry itself — a second reader of `smooth` and `cubic` is a second
+ * renderer, and it would drift from the first.
+ *
+ * An eraser arrives as `globalCompositeOperation = 'destination-out'` and
+ * cuts only what was drawn before it in the same cell.
+ */
+export interface PluginCanvas {
+  globalCompositeOperation: string;
+  lineWidth: number;
+  strokeStyle: string;
+  fillStyle: string;
+  lineCap: string;
+  lineJoin: string;
+  setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+  beginPath(): void;
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
+  bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void;
+  fill(): void;
+  stroke(): void;
+  fillRect(x: number, y: number, w: number, h: number): void;
+}
+
+/** The document as a format reads it: read-only, and drawn by the editor. */
+export interface PluginScene {
+  /** The canvas, in document units (`1 / FIXED_POINT_SCALE` of a logical pixel). */
+  readonly width: number;
+  readonly height: number;
+  readonly frameRate: number;
+  readonly frames: number;
+  /** The frame in hand. */
+  readonly frame: number;
+  /** What an opaque picture is laid on. */
+  readonly background: string;
+  /** Visible layers, bottom-up; hidden ones are not here at all. */
+  readonly layers: number;
+  /** Draws one cell of a visible layer, in document units; out of range draws nothing. */
+  draw(layer: number, frame: number, target: PluginCanvas): void;
+}
+
+/** The file a format hands back, and the name it is saved under. */
+export interface PluginExport {
+  readonly blob: Blob;
+  readonly name: string;
+}
+
+/** A format of the export window. */
+export interface PluginExporter {
+  readonly label: PluginText;
+  /** One line on what it writes. */
+  readonly hint?: PluginText;
+  run(scene: PluginScene): PluginExport | Promise<PluginExport>;
+}
+
+/**
  * The manifest: the module's `export default`. `name`, `version` and
  * `description` are read from here only when the bundle is installed from
  * disk — for a plugin of the catalog they come from its record.
@@ -380,4 +439,6 @@ export interface Plugin {
   readonly tools?: Readonly<Record<string, PluginTool>>;
   readonly presets?: Readonly<Record<string, PluginPreset>>;
   readonly brushTypes?: Readonly<Record<string, PluginBrushType>>;
+  /** Formats it adds to the export window, keyed by id. */
+  readonly exporters?: Readonly<Record<string, PluginExporter>>;
 }

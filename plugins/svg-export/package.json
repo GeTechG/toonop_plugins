@@ -1,0 +1,28 @@
+{
+  "name": "svg-export",
+  "version": "1.0.0",
+  "description": "Экспорт в SVG: кадр в руках или все кадры архивом.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "toonop": {
+    "title": {
+      "ru": "Экспорт в SVG",
+      "en": "SVG export"
+    },
+    "description": {
+      "ru": "Кадр в руках — одним SVG, все кадры — архивом SVG.",
+      "en": "The frame in hand as one SVG, every frame as a zip of SVGs."
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "build": "node --test && esbuild src/index.ts --bundle --format=esm --target=es2022 --outfile=dist/plugin.js"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
