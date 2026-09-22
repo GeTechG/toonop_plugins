@@ -9,6 +9,9 @@
 
 import type { Plugin } from '../../../types/toonop.ts';
 import { frameSvg, framesZip } from './svg.ts';
+// A bundle put in from a file has no catalog record: it names itself, with
+// the words its package already carries rather than a second copy of them.
+import pkg from '../package.json' with { type: 'json' };
 
 /** Drawn on the 24-unit grid: a curve between its two anchors. */
 const ICON = '<path d="M5 19C5 9 19 15 19 5" /><rect x="3" y="17" width="4" height="4" /><rect x="17" y="3" width="4" height="4" />';
@@ -17,6 +20,9 @@ const plugin: Plugin = {
   id: 'svg-export',
   // The major this plugin was written against: see types/toonop.ts.
   api: 1,
+  name: pkg.toonop.title,
+  version: pkg.version,
+  description: pkg.toonop.description,
   icon: ICON,
   locales: {
     ru: {
