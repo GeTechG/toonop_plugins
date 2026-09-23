@@ -1,7 +1,7 @@
 {
   "name": "straight-line",
-  "version": "1.2.0",
-  "description": "Ровная линия: тянете от точки до точки, в кадр ложится прямая.",
+  "version": "1.2.1",
+  "description": "Ровная линия: тянешь от точки до точки, и в кадр ложится прямая.",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
       "en": "Straight line"
     },
     "description": {
-      "ru": "Ровная линия: тянете от точки до точки, в кадр ложится прямая.",
+      "ru": "Ровная линия: тянешь от точки до точки, и в кадр ложится прямая.",
       "en": "A straight line: drag from point to point and a straight stroke lands in the frame."
     }
   },
