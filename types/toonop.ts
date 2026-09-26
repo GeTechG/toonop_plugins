@@ -315,7 +315,7 @@ export interface UxProfile {
   /** Upper bound for the +/- brush nudge (logical px). */
   readonly brushSizeMax: number;
   /** Adaptive +/- step (1 below 10, 5 below 50, else 10) instead of a flat 1. */
-  readonly adaptiveBrushStep: boolean;
+  readonly adaptiveBrushStep: boolean | 'ladder';
   /**
    * How the editor's canvas is rasterised. `device` takes the screen's
    * `devicePixelRatio`; `document` takes one bitmap pixel per document pixel.
