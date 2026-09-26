@@ -1,0 +1,37 @@
+{
+  "api": 1,
+  "plugins": [
+    {
+      "id": "straight-line",
+      "name": {
+        "ru": "Ровная линия",
+        "en": "Straight line"
+      },
+      "version": "1.2.1",
+      "description": {
+        "ru": "Ровная линия: тянешь от точки до точки, и в кадр ложится прямая.",
+        "en": "A straight line: drag from point to point and a straight stroke lands in the frame."
+      },
+      "icon": "<path d=\"M5 19 19 5\" /><circle cx=\"5\" cy=\"19\" r=\"2\" /><circle cx=\"19\" cy=\"5\" r=\"2\" />",
+      "entry": "straight-line/plugin.js",
+      "size": 1689,
+      "source": "3bddb68971118d84d97846eb26406fa837553d5c8c647fb373357be93c2b6cfd"
+    },
+    {
+      "id": "svg-export",
+      "name": {
+        "ru": "Экспорт в SVG",
+        "en": "SVG export"
+      },
+      "version": "1.0.1",
+      "description": {
+        "ru": "Кадр в руках — одним SVG, все кадры — архивом SVG.",
+        "en": "The frame in hand as one SVG, every frame as a zip of SVGs."
+      },
+      "icon": "<path d=\"M5 19C5 9 19 15 19 5\" /><rect x=\"3\" y=\"17\" width=\"4\" height=\"4\" /><rect x=\"17\" y=\"3\" width=\"4\" height=\"4\" />",
+      "entry": "svg-export/plugin.js",
+      "size": 23544,
+      "source": "eb0dffc7e7414f7eaa4dad9a69239a1a97cdefce69fe0018796a855cffe0fd2f"
+    }
+  ]
+}
