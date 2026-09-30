@@ -248,11 +248,28 @@ export interface PluginPrimitive {
   descriptor(brush: PluginBrush): LineToolDescriptor;
 }
 
+/**
+ * Single-character keys the editor holds for itself — its reserved keys and
+ * its own tools' — as of contract major 1. A plugin that asks for one of them
+ * gets no key. The catalog build refuses such a plugin, and two plugins of the
+ * catalog asking for the same key (see `scripts/build.mjs`). Kept in step with
+ * `RESERVED_KEYS` and the tools of `editor/src/lib/plugins/builtins.ts` by hand.
+ */
+export type EditorKey =
+  | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'h' | 'j' | 'k' | 'l' | 'm' | 'o' | 'p' | 'q'
+  | 's' | 'v' | 'w' | 'x' | 'y' | 'z' | '+' | '-' | '=' | '_' | '`' | '~';
+
 /** A tool a plugin adds: how it is drawn, and what the gesture does. */
 export interface PluginTool {
   readonly label: PluginText;
   readonly title: PluginText;
-  /** The shortcut it asks for; dropped when something already holds it. */
+  /**
+   * The shortcut it asks for: one printable Latin character (`/^[\x21-\x7e]$/`,
+   * case does not matter), or `''` for none. Anything else — Tab, F5, a chord
+   * like Ctrl+K — is refused with a reason in the plugins list, and the tool
+   * comes without a key. So is a key something already holds: the editor
+   * (`EditorKey`) or a plugin registered earlier. The first one keeps it.
+   */
   readonly key: string;
   /** SVG markup on a 24-unit grid, drawn at the size of the editor's own icons. */
   readonly icon: string;

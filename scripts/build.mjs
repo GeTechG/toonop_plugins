@@ -16,6 +16,9 @@
  *   `api` major — fails the build. Offering what cannot be installed is worse
  *   than offering nothing, and the author finds out in their own pull request
  *   rather than from a plugin quietly missing from the catalog.
+ * - A tool key the editor would drop fails it too: anything but one printable
+ *   Latin character, a key the editor holds (`EditorKey`), or a key another
+ *   plugin of the catalog asked for first.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -56,6 +59,40 @@ const contract = await readFile(path.join(root, 'types', 'toonop.ts'), 'utf8');
 const PLUGIN_API = Number(contract.match(/export type PluginApi = (\d+);/)?.[1]);
 if (!PLUGIN_API) {
   fail('types/toonop.ts does not say what the contract major is');
+}
+
+/**
+ * The keys the editor holds, from the contract too (`EditorKey`): a tool that
+ * asks for one of them, or for a key another plugin of the catalog asked for
+ * first, would come without it — and the author would not know why.
+ */
+const EDITOR_KEYS = new Set(
+  [...(contract.match(/export type EditorKey =([^;]+);/)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]),
+);
+if (EDITOR_KEYS.size === 0) {
+  fail('types/toonop.ts does not say which keys the editor holds (EditorKey)');
+}
+/** key → the plugin that asked for it first. */
+const keys = new Map();
+
+/** Why a plugin's tool keys would not reach the editor, or null. */
+function keyProblem(dir, manifest) {
+  for (const [id, tool] of Object.entries(manifest.tools ?? {})) {
+    const key = typeof tool?.key === 'string' ? tool.key.trim() : '';
+    if (!key) continue;
+    if (!/^[\x21-\x7e]$/.test(key)) {
+      return `tool ${id} asks for key "${tool.key}": a key is one printable Latin character`;
+    }
+    const lower = key.toLowerCase();
+    if (EDITOR_KEYS.has(lower)) {
+      return `tool ${id} asks for key "${key}", which the editor holds (EditorKey in types/toonop.ts)`;
+    }
+    if (keys.has(lower)) {
+      return `tool ${id} asks for key "${key}", which ${keys.get(lower)} already asked for`;
+    }
+    keys.set(lower, `${dir}/${id}`);
+  }
+  return null;
 }
 
 /** The published catalog, when the action handed us a checkout of it. */
@@ -152,7 +189,8 @@ for (const dir of dirs) {
   const { manifest, reason } = await manifestOf(bundle);
   const refuse = reason
     ?? (manifest.id !== dir ? `the bundle is plugin ${manifest.id ?? '<no id>'}, not ${dir}` : null)
-    ?? (manifest.api !== PLUGIN_API ? `asks for api major ${manifest.api}, the contract is on ${PLUGIN_API}` : null);
+    ?? (manifest.api !== PLUGIN_API ? `asks for api major ${manifest.api}, the contract is on ${PLUGIN_API}` : null)
+    ?? keyProblem(dir, manifest);
   if (refuse) {
     fail(`${dir}: ${refuse}`);
   }

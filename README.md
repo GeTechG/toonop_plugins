@@ -70,8 +70,8 @@ const plugin: Plugin = {
   id: 'straight-line',
   api: 1,
   locales: {
-    ru: { label: 'Линия', title: 'Ровная линия (L)' },
-    en: { label: 'Line', title: 'Straight line (L)' },
+    ru: { label: 'Линия', title: 'Ровная линия (U)' },
+    en: { label: 'Line', title: 'Straight line (U)' },
   },
   tools: {
     'straight-line': {

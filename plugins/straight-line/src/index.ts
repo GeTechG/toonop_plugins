@@ -34,14 +34,14 @@ const plugin: Plugin = {
   // Its own words, under its own namespace in the editor's i18next. The
   // manifest below points into them by key; `host.t` would read the same.
   locales: {
-    ru: { label: 'Линия', title: 'Ровная линия (L)' },
-    en: { label: 'Line', title: 'Straight line (L)' },
+    ru: { label: 'Линия', title: 'Ровная линия (U)' },
+    en: { label: 'Line', title: 'Straight line (U)' },
   },
   tools: {
     'straight-line': {
       label: { t: 'label' },
       title: { t: 'title' },
-      key: 'l',
+      key: 'u',
       icon: ICON,
       stroke: {
         kind: 'pencil',
