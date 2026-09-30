@@ -1,6 +1,6 @@
 {
   "name": "straight-line",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Ровная линия: тянешь от точки до точки, и в кадр ложится прямая.",
   "license": "MIT",
   "private": true,
@@ -16,7 +16,8 @@
     }
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --format=esm --target=es2022 --outfile=dist/plugin.js"
+    "test": "node --test",
+    "build": "node --test && esbuild src/index.ts --bundle --format=esm --target=es2022 --outfile=dist/plugin.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

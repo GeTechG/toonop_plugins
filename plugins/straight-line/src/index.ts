@@ -9,19 +9,17 @@
 import type { Plugin } from '../../../types/toonop';
 
 /**
- * The first point of the gesture is the start, the latest one the end.
- * Nothing piles up between them: a line stays a line however long it is
- * dragged around. Two points are a finished stroke already, so the commit
- * thins nothing.
+ * The engine appends what `capture` returns — the addition, never the line
+ * rebuilt: a line handed back whole was appended again at every move, the
+ * start written over and over, and a fan of lines landed. So every event's
+ * point is kept, and the two ends are picked out of them for the hand and for
+ * the frame alike: a line stays a line however long it is dragged around.
  */
-const capture = (line: readonly number[], points: readonly number[]): number[] => {
-  if (points.length < 2) {
-    return [...line];
-  }
-  const x = points[points.length - 2];
-  const y = points[points.length - 1];
-  return line.length >= 2 ? [line[0], line[1], x, y] : [x, y];
-};
+const capture = (_line: readonly number[], points: readonly number[]): number[] =>
+  points.length < 2 ? [] : [points[points.length - 2], points[points.length - 1]];
+
+const ends = (line: readonly number[]): number[] =>
+  line.length < 2 ? [...line] : [line[0], line[1], line[line.length - 2], line[line.length - 1]];
 
 /** Drawn on the 24-unit grid: the catalog record and the tool both take it. */
 const ICON = '<path d="M5 19 19 5" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="5" r="2" />';
@@ -55,7 +53,8 @@ const plugin: Plugin = {
           // Two points: neither thinning number has anything to do here.
           smoothing: false,
           capture,
-          prepare: (points) => [...points],
+          preview: ends,
+          prepare: ends,
         }),
       },
     },

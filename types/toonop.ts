@@ -182,6 +182,10 @@ export interface PluginHost {
 
 /** The brush record the editor holds for the tool in hand. */
 export interface PluginBrush {
+  /**
+   * Logical pixels, as the sliders hold it, when `rules()` reads the record;
+   * document units — the width the stroke is stored with — in `descriptor()`.
+   */
   readonly width: number;
   readonly color: string;
   readonly fill: string;
@@ -206,7 +210,11 @@ export interface StrokeRules {
   readonly defaults?: { readonly width: number; readonly smooth: number; readonly minDistance: number };
   /** Whether the smoothing pair reaches this brush at all. */
   readonly smoothing?: boolean;
-  /** Folds a batch of pointer samples into the points collected so far. */
+  /**
+   * What a batch of pointer samples adds to the points collected so far — the
+   * addition, not the line rebuilt: the editor appends whatever comes back.
+   * `line` is there to be looked at, never written into.
+   */
   capture(line: readonly number[], batch: readonly number[], width: number): number[];
   /** The line under the hand, before the thinning the commit does. */
   preview?(points: readonly number[]): number[];
