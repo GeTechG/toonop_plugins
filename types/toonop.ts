@@ -333,8 +333,6 @@ export interface UxProfile {
   readonly playbackRange: 'document' | 'selection';
   /** Where a new layer lands relative to the active one; Ctrl inverts it. */
   readonly newLayerPosition: 'above' | 'below';
-  /** A new stroke leaves the redo buffer alone instead of clearing it. */
-  readonly redoSurvivesStroke: boolean;
   /** Frame rate a fresh document gets under this preset. */
   readonly defaultFps: number;
   /** Upper bound for the +/- brush nudge (logical px). */
