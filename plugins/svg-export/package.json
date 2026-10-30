@@ -1,6 +1,6 @@
 {
   "name": "svg-export",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Экспорт в SVG: кадр в руках или все кадры архивом.",
   "license": "MIT",
   "private": true,
@@ -17,10 +17,12 @@
   },
   "scripts": {
     "test": "node --test",
-    "build": "node --test && esbuild src/index.ts --bundle --format=esm --target=es2022 --outfile=dist/plugin.js"
+    "build": "node --test && esbuild src/index.ts --bundle --format=esm --target=es2022 --minify --outfile=dist/plugin.js"
   },
   "dependencies": {
-    "fflate": "^0.8.3"
+    "clipper-lib": "^6.4.2",
+    "fflate": "^0.8.3",
+    "fit-curve": "^0.2.0"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

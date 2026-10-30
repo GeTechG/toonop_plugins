@@ -10,6 +10,7 @@
 import { strToU8, zipSync } from 'fflate';
 
 import type { PluginCanvas, PluginScene } from '../../../types/toonop.ts';
+import { outlinePath } from './outline.ts';
 
 /** Document units per logical pixel (`FIXED_POINT_SCALE` of the contract). */
 const UNITS_PER_PIXEL = 8;
@@ -18,6 +19,9 @@ const UNITS_PER_PIXEL = 8;
 const n = (value: number): string => String(Math.round(value * 1000) / 1000);
 
 const escape = (value: string): string => value.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+
+const circlePath = (x: number, y: number, r: number): string =>
+  `M${n(x - r)} ${n(y)}a${n(r)} ${n(r)} 0 1 0 ${n(2 * r)} 0a${n(r)} ${n(r)} 0 1 0 ${n(-2 * r)} 0`;
 
 /**
  * One layer's worth of canvas, as SVG markup.
@@ -35,6 +39,8 @@ class SvgCanvas implements PluginCanvas {
   lineJoin = 'miter';
 
   #d = '';
+  /** The path's circles: more than one is a line of changing width (see `outline.ts`). */
+  #circles: [number, number, number][] = [];
   #body = '';
   /** What the erasers in a row cut, waiting for the next paint to close the mask. */
   #cut = '';
@@ -53,6 +59,7 @@ class SvgCanvas implements PluginCanvas {
 
   beginPath(): void {
     this.#d = '';
+    this.#circles = [];
   }
 
   moveTo(x: number, y: number): void {
@@ -72,15 +79,27 @@ class SvgCanvas implements PluginCanvas {
   }
 
   /**
-   * The renderer only ever arcs a whole circle — a dot — so it is written as
-   * two half-circle arcs, which a path can close on itself.
+   * The renderer only ever arcs a whole circle — a dot, or one of the many of a
+   * line of changing width — so it is written as two half-circle arcs, which a
+   * path can close on itself.
    */
   arc(x: number, y: number, r: number): void {
-    this.#d += `M${n(x - r)} ${n(y)}a${n(r)} ${n(r)} 0 1 0 ${n(2 * r)} 0a${n(r)} ${n(r)} 0 1 0 ${n(-2 * r)} 0`;
+    this.#circles.push([x, y, r]);
+    this.#d += circlePath(x, y, r);
   }
 
   fill(): void {
-    this.#put((paint) => `<path d="${this.#d}" fill="${paint(this.fillStyle)}"/>`);
+    const d = this.#filledPath();
+    this.#put((paint) => `<path d="${d}" fill="${paint(this.fillStyle)}"/>`);
+  }
+
+  #filledPath(): string {
+    const [first, ...rest] = this.#circles;
+    if (rest.length === 0) {
+      return this.#d;
+    }
+    const still = rest.every((circle) => circle.every((value, i) => value === first[i]));
+    return still ? circlePath(...first) : outlinePath(this.#circles);
   }
 
   stroke(): void {
@@ -137,11 +156,13 @@ export function frameSvg(scene: PluginScene, frame: number): string {
 }
 
 /** Every frame, one SVG each, numbered wide enough to sort the way they play. */
-export function framesZip(scene: PluginScene): Uint8Array {
+export async function framesZip(scene: PluginScene): Promise<Uint8Array> {
   const digits = Math.max(2, String(scene.frames).length);
   const files: Record<string, Uint8Array> = {};
   for (let frame = 0; frame < scene.frames; frame++) {
     files[`toonop-${String(frame + 1).padStart(digits, '0')}.svg`] = strToU8(frameSvg(scene, frame));
+    // A heavy frame's outlines take seconds: the page gets to breathe between frames.
+    await new Promise((resolve) => setTimeout(resolve));
   }
   return zipSync(files);
 }

@@ -50,8 +50,8 @@ const plugin: Plugin = {
     'svg-frames': {
       label: { t: 'frames' },
       hint: { t: 'frames_hint' },
-      run: (scene) => ({
-        blob: new Blob([framesZip(scene)], { type: 'application/zip' }),
+      run: async (scene) => ({
+        blob: new Blob([await framesZip(scene)], { type: 'application/zip' }),
         name: 'toonop-svg.zip',
       }),
     },
