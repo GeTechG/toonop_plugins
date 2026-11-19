@@ -20,6 +20,9 @@ const n = (value: number): string => String(Math.round(value * 1000) / 1000);
 
 const escape = (value: string): string => value.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
+const opacityGroup = (markup: string, alpha: number): string =>
+  alpha === 1 ? markup : `<g opacity="${n(alpha)}">${markup}</g>`;
+
 const circlePath = (x: number, y: number, r: number): string =>
   `M${n(x - r)} ${n(y)}a${n(r)} ${n(r)} 0 1 0 ${n(2 * r)} 0a${n(r)} ${n(r)} 0 1 0 ${n(-2 * r)} 0`;
 
@@ -31,6 +34,7 @@ const circlePath = (x: number, y: number, r: number): string =>
  * comes after is drawn over it untouched. Erasers in a row share one mask.
  */
 class SvgCanvas implements PluginCanvas {
+  globalAlpha = 1;
   globalCompositeOperation = 'source-over';
   lineWidth = 1;
   strokeStyle = '#000000';
@@ -56,6 +60,21 @@ class SvgCanvas implements PluginCanvas {
 
   // The scene draws in document units, which is what the viewBox is in.
   setTransform(): void {}
+
+  withOpacityGroup(alpha: number, draw: () => void): void {
+    this.#closeMask();
+    const before = this.#body;
+    this.#body = '';
+    try {
+      draw();
+      this.#closeMask();
+      this.#body = before + opacityGroup(this.#body, alpha);
+    } catch (error) {
+      this.#body = before;
+      this.#cut = '';
+      throw error;
+    }
+  }
 
   beginPath(): void {
     this.#d = '';
@@ -114,11 +133,11 @@ class SvgCanvas implements PluginCanvas {
   /** Paint goes on the layer; an eraser's shape goes into the mask, black. */
   #put(element: (paint: (color: string) => string) => string): void {
     if (this.globalCompositeOperation === 'destination-out') {
-      this.#cut += element(() => '#000');
+      this.#cut += opacityGroup(element(() => '#000'), this.globalAlpha);
       return;
     }
     this.#closeMask();
-    this.#body += element(escape);
+    this.#body += opacityGroup(element(escape), this.globalAlpha);
   }
 
   #closeMask(): void {

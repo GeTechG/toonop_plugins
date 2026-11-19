@@ -46,6 +46,20 @@ test('a stroked path keeps its curve, width, colour and round ends', () => {
   assert.match(svg, /<path d="M0 0Q80 80 160 0" fill="none" stroke="#ff0000" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"\/>/);
 });
 
+test('groups flat strokes once and applies ordinary stroke opacity separately', () => {
+  const svg = frameSvg(scene([(canvas) => {
+    canvas.withOpacityGroup!(0.5, () => { line(canvas); line(canvas); });
+    canvas.globalAlpha = 0.5;
+    line(canvas);
+    canvas.globalAlpha = 1;
+    line(canvas);
+  }]), 0);
+
+  const path = '<path [^>]+/>';
+  assert.match(svg, new RegExp('<g opacity="0\\.5">' + path + path + '</g>'
+    + '<g opacity="0\\.5">' + path + '</g>' + path));
+});
+
 test('a dot is a filled circle of its radius', () => {
   const svg = frameSvg(scene([(canvas) => {
     canvas.beginPath();

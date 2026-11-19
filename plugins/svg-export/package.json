@@ -1,6 +1,6 @@
 {
   "name": "svg-export",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Экспорт в SVG: кадр в руках или все кадры архивом.",
   "license": "MIT",
   "private": true,
